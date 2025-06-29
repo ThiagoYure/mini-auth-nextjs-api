@@ -13,6 +13,13 @@ const montserrat = Montserrat({
 
 const customTheme = createTheme({
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "5rem",
+        },
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
@@ -52,7 +59,8 @@ const customTheme = createTheme({
       contrastText: "#000",
     },
     background: {
-      default: "#1c1c1c",
+      default:
+        "radial-gradient(circle,rgba(156, 39, 176, 1) 0%, rgba(28, 28, 28, 1) 79%)",
       paper: "#292929",
     },
   },

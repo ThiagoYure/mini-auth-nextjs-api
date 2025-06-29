@@ -20,7 +20,7 @@ export default function RootLayout({
             <GlobalStyles
               styles={{
                 body: {
-                  backgroundColor: customTheme.palette.background.default,
+                  background: customTheme.palette.background.default,
                 },
               }}
             />

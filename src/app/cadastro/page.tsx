@@ -1,6 +1,6 @@
 "use client";
 
-import FormLogin from "@/components/forms/formLogin";
+import FormCadastro from "@/components/forms/formCadastro";
 import customTheme from "@/themes/customTheme";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import Link from "next/link";
@@ -13,13 +13,14 @@ export default function Login() {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "92vh",
+        padding: "5rem",
       }}
     >
       <Stack
         direction={"row"}
         sx={{
           minHeight: 450,
-          minWidth: 800,
+          width: 1000,
           borderRadius: "1rem",
           position: "relative",
           backgroundColor: customTheme.palette.background.paper,
@@ -38,38 +39,36 @@ export default function Login() {
         }}
       >
         <Stack
-          spacing={4}
+          spacing={2}
           alignItems={"center"}
           justifyContent={"center"}
           flex={1}
-          sx={{ padding: "1rem 3rem", textAlign: "center" }}
+          sx={{ padding: "3rem 3rem", textAlign: "center" }}
         >
           <Typography variant="h3" fontWeight={"700"} color="primary">
-            Hi User
+            Registration
           </Typography>
           <Typography variant="body2">
-            Welcome to a mini auth app by Thiago Yure.
+            Complete your registration to use the app.
           </Typography>
-          <FormLogin />
+          <FormCadastro />
           <Stack direction={"row"} spacing={1} lineHeight={1.2}>
-            <Typography variant="body2">
-              Don&apos;t have an account yet?
-            </Typography>
+            <Typography variant="body2">Already have an account?</Typography>
             <Link
-              href="/cadastro"
+              href="/login"
               style={{
                 color: customTheme.palette.primary.main,
                 cursor: "pointer",
               }}
             >
-              Sing up
+              Sing in
             </Link>
           </Stack>
         </Stack>
         <Box
           sx={{
             borderRadius: "0 1rem 1rem 0",
-            backgroundImage: "url('/images/image-login.webp')",
+            backgroundImage: "url('/images/image-register.webp')",
             flex: 1,
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",

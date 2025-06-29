@@ -9,7 +9,7 @@ export default function CustomFooter() {
         padding: "1rem",
       }}
     >
-      &copy;2025, Desenvolvido por Thiago Yure.
+      &copy;2025, Developed by Thiago Yure.
     </footer>
   );
 }

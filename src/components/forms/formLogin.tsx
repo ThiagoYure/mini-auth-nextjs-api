@@ -49,7 +49,7 @@ export default function FormLogin() {
         variant="outlined"
         type={showPassword ? "text" : "password"}
         required
-        label="Senha"
+        label="Password"
         fullWidth
         sx={{
           input: {
