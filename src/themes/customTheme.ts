@@ -16,6 +16,7 @@ const customTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          disableElevation: true,
           borderRadius: "5rem",
         },
       },

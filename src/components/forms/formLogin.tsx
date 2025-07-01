@@ -1,10 +1,4 @@
-import {
-  Button,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
 import { useState } from "react";
 import LockIcon from "@mui/icons-material/Lock";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -17,7 +11,7 @@ export default function FormLogin() {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
   return (
-    <FormControl
+    <form
       style={{
         display: "flex",
         flexDirection: "column",
@@ -37,12 +31,14 @@ export default function FormLogin() {
             color: "#c2c2c2",
           },
         }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment sx={{ color: "#c2c2c2" }} position="start">
-              <EmailIcon />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment sx={{ color: "#c2c2c2" }} position="start">
+                <EmailIcon />
+              </InputAdornment>
+            ),
+          },
         }}
       />
       <TextField
@@ -56,23 +52,25 @@ export default function FormLogin() {
             color: "#c2c2c2",
           },
         }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment sx={{ color: "#c2c2c2" }} position="start">
-              <LockIcon />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={handleClickShowPassword} edge="end">
-                {showPassword ? (
-                  <VisibilityOffIcon sx={{ color: "#c2c2c2" }} />
-                ) : (
-                  <VisibilityIcon sx={{ color: "#c2c2c2" }} />
-                )}
-              </IconButton>
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment sx={{ color: "#c2c2c2" }} position="start">
+                <LockIcon />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleClickShowPassword} edge="end">
+                  {showPassword ? (
+                    <VisibilityOffIcon sx={{ color: "#c2c2c2" }} />
+                  ) : (
+                    <VisibilityIcon sx={{ color: "#c2c2c2" }} />
+                  )}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
         }}
       />
       <Button
@@ -83,6 +81,6 @@ export default function FormLogin() {
       >
         Entrar
       </Button>
-    </FormControl>
+    </form>
   );
 }
