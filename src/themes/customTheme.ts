@@ -60,8 +60,7 @@ const customTheme = createTheme({
       contrastText: "#000",
     },
     background: {
-      default:
-        "radial-gradient(circle,rgba(156, 39, 176, 1) 0%, rgba(28, 28, 28, 1) 79%)",
+      default: "#212121",
       paper: "#292929",
     },
   },

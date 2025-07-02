@@ -7,7 +7,6 @@ import {
   InputAdornment,
   Step,
   StepContent,
-  StepLabel,
   Stepper,
   TextField,
   Typography,
@@ -18,7 +17,7 @@ import {
   InputLabel,
   FormHelperText,
   Alert,
-  SelectChangeEvent,
+  StepButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import LockIcon from "@mui/icons-material/Lock";
@@ -30,52 +29,20 @@ import PinIcon from "@mui/icons-material/Pin";
 import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import customTheme from "@/themes/customTheme";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Country } from "@/types/Country";
+import { State } from "@/types/State";
+import { City } from "@/types/City";
 
 const steps = ["Personal Info", "Location Info", "Contact Info", "Access Info"];
 const stepsToRegister = steps.length;
 
 export default function FormCadastro() {
   const [loading, setLoading] = useState(true);
-  const [countries, setCountries] = useState<
-    {
-      name: { common: string; official: string; nativeName: string };
-      translations: string;
-      cca2: string;
-      idd: string;
-      postalCode: {
-        format: string;
-        regex: string;
-      };
-    }[]
-  >([
-    {
-      name: {
-        common: "",
-        official: "",
-        nativeName: "",
-      },
-      translations: "",
-      cca2: "",
-      idd: "",
-      postalCode: {
-        format: "",
-        regex: "",
-      },
-    },
-  ]);
-  const [selectedCountry, setSelectedCountry] = useState<{
-    name: { common: string; official: string; nativeName: string };
-    translations: string;
-    cca2: string;
-    idd: string;
-    postalCode: {
-      format: string;
-      regex: string;
-    };
-  }>({
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<Country>({
     name: {
       common: "",
       official: "",
@@ -83,83 +50,95 @@ export default function FormCadastro() {
     },
     translations: "",
     cca2: "",
-    idd: "",
+    idd: { root: "", suffixes: [] },
     postalCode: {
       format: "",
       regex: "",
     },
   });
-  const [states, setStates] = useState<
-    {
-      id: string;
-      name: string;
-      iso2: string;
-    }[]
-  >([
-    {
-      id: "",
-      name: "",
-      iso2: "",
-    },
-  ]);
-  const [cities, setCities] = useState<
-    {
-      id: string;
-      name: string;
-      latitude: string;
-      longitude: string;
-    }[]
-  >([{ id: "", name: "", latitude: "", longitude: "" }]);
+  const [states, setStates] = useState<State[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [completed, setCompleted] = useState<{
+    [k: number]: boolean;
+  }>({});
 
-  useEffect(() => {
-    fetch(
-      "https://restcountries.com/v3.1/all?fields=name,translations,idd,cca2,postalcode",
-      {
-        method: "GET",
-      }
-    )
-      .then((res) => res.json())
-      .then((data: []) => {
-        data.sort(function (
-          a: {
-            name: { common: string; official: string; nativeName: string };
-            translations: string;
-            cca2: string;
-            idd: string;
-            postalCode: {
-              format: string;
-              regex: string;
-            };
-          },
-          b: {
-            name: { common: string; official: string; nativeName: string };
-            translations: string;
-            cca2: string;
-            idd: string;
-            postalCode: {
-              format: string;
-              regex: string;
-            };
-          }
-        ) {
-          const nomeA = a.name.common.toUpperCase();
-          const nomeB = b.name.common.toUpperCase();
-          if (nomeA < nomeB) {
-            return -1;
-          }
-          if (nomeA > nomeB) {
-            return 1;
-          }
-          return 0;
+  const validateStepFields = async () => {
+    let stepFields: (keyof FormData)[] = [];
+
+    switch (activeStep) {
+      case 0:
+        stepFields = ["firstName", "lastName", "birthdate"];
+        break;
+      case 1:
+        stepFields = ["country", "state", "city", "postalCode"];
+        break;
+      case 2:
+        stepFields = ["phoneNumber", "email", "confirmEmail"];
+        break;
+      case 3:
+        stepFields = ["password", "confirmPassword"];
+        break;
+      default:
+        stepFields = [];
+    }
+
+    const result = await trigger(stepFields);
+    return result;
+  };
+
+  const completedSteps = () => {
+    return Object.keys(completed).length;
+  };
+
+  const isLastStep = () => {
+    return activeStep === stepsToRegister - 1;
+  };
+
+  const allStepsCompleted = () => {
+    return completedSteps() === stepsToRegister;
+  };
+
+  const handleNext = () => {
+    const newActiveStep =
+      isLastStep() && !allStepsCompleted()
+        ? steps.findIndex((step, i) => !(i in completed))
+        : activeStep + 1;
+    setActiveStep(newActiveStep);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleStep = (step: number) => () => {
+    setActiveStep(step);
+  };
+
+  const handleComplete = () => {
+    validateStepFields().then((res) => {
+      if (res) {
+        setCompleted({
+          ...completed,
+          [activeStep]: true,
         });
-        setCountries(data);
-      });
+        if (!allStepsCompleted()) {
+          handleNext();
+        } else {
+          setActiveStep(-1);
+        }
+      } else {
+        console.log("Fill required fields from this step to complete it.");
+      }
+    });
+  };
 
-    setLoading(false);
-  }, []);
+  const handleReset = () => {
+    setActiveStep(0);
+    setCompleted({});
+  };
 
   const schema = z
     .object({
@@ -169,30 +148,52 @@ export default function FormCadastro() {
       lastName: z
         .string()
         .min(3, "Your last name must have at least 3 letters."),
-      birthdate: z.date(),
-      country: z.string(),
-      state: z.string(),
-      city: z.string(),
-      postalCode: z.string(),
-      phoneNumber: z.string(),
-      email: z.string().email("invalid email."),
-      confirmEmail: z.string().email("invalid email."),
+      birthdate: z.string(),
+      country: z.string().nonempty("You must specify a country."),
+      state: z.string().nonempty("You must specify a state."),
+      city: z.string().nonempty("You must specify a city."),
+      postalCode: z
+        .string()
+        .nonempty("You must specify a postal code.")
+        .regex(
+          new RegExp(selectedCountry.postalCode.regex),
+          "Invalid postal code format."
+        ),
+      phoneNumber: z
+        .string()
+        .nonempty("You must inform a phone number.")
+        .refine(
+          (val) => {
+            const ddi =
+              selectedCountry.idd.root +
+              (selectedCountry.idd.suffixes || []).join("");
+            const regex = new RegExp(
+              `^\\${ddi}\\s?\\(?\\d{2}\\)?\\s?\\d{4,5}-\\d{4}$`
+            );
+            return regex.test(val);
+          },
+          {
+            message: "Invalid phone number format.",
+          }
+        ),
+      email: z
+        .string()
+        .nonempty("You must inform a valid email")
+        .email("invalid email."),
+      confirmEmail: z
+        .string()
+        .nonempty("Confirm your email please.")
+        .email("invalid email."),
       password: z
         .string()
+        .nonempty("You must inform a password.")
         .min(6, "The password must have at least 8 characters.")
         .regex(/[A-Z]/, "The password must have at least 1 capital letter.")
         .regex(/[0-9]/, "The password must have at least 1 number."),
-      confirmPassword: z.string(),
+      confirmPassword: z.string().nonempty("Confirm your password please."),
     })
-    .superRefine((data, ctx) => {
-      const pattern = new RegExp(selectedCountry.postalCode.regex);
-      if (pattern && !pattern.test(data.postalCode)) {
-        ctx.addIssue({
-          path: ["postalCode"],
-          code: z.ZodIssueCode.custom,
-          message: `Invalid Postal Code for selected country.`,
-        });
-      }
+    .refine((data) => !isNaN(Date.parse(data.birthdate)), {
+      message: "Invalid date format",
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: "The passwords don't match.",
@@ -207,11 +208,49 @@ export default function FormCadastro() {
 
   const {
     register,
+    trigger,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      firstName: "",
+      birthdate: "",
+      city: "",
+      confirmEmail: "",
+      confirmPassword: "",
+      country: "",
+      email: "",
+      lastName: "",
+      password: "",
+      phoneNumber: "",
+      postalCode: "",
+      state: "",
+    },
   });
+
+  const fetchCountries = async () => {
+    const res = await fetch(
+      "https://restcountries.com/v3.1/all?fields=name,translations,idd,cca2,postalCode",
+      {
+        method: "GET",
+      }
+    );
+    const data = await res.json();
+    console.log(data);
+    return data.sort((a: Country, b: Country) =>
+      a.name.common.localeCompare(b.name.common)
+    );
+  };
+
+  useEffect(() => {
+    const data = fetchCountries();
+    data.then((res) => {
+      setCountries(res);
+    });
+    setLoading(false);
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -222,105 +261,57 @@ export default function FormCadastro() {
     }
   };
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-  const handleSelectedCountryChanged = async (event: SelectChangeEvent) => {
-    const country = JSON.parse(event.target.value);
-    setSelectedCountry(country);
-    const headers = new Headers();
-    headers.append("X-CSCAPI-KEY", process.env.STATES_API_KEY || "");
+  const handleSelectedCountryChanged = async (countryCode: string) => {
+    const selectedCountry: Country[] = countries.filter((country) => {
+      return country.cca2 === countryCode;
+    });
+    setSelectedCountry(selectedCountry[0]);
 
-    fetch(
-      `https://api.countrystatecity.in/v1/countries/${country.cca2}/states`,
+    const headers = new Headers();
+    headers.append(
+      "X-CSCAPI-KEY",
+      process.env.NEXT_PUBLIC_STATES_API_KEY || ""
+    );
+
+    const res = await fetch(
+      `https://api.countrystatecity.in/v1/countries/${countryCode}/states`,
       {
         method: "GET",
         headers: headers,
       }
-    )
-      .then((res) => res.json())
-      .then((data: []) => {
-        data.sort(function (
-          a: {
-            id: string;
-            name: string;
-            iso2: string;
-          },
-          b: {
-            id: string;
-            name: string;
-            iso2: string;
-          }
-        ) {
-          const nomeA = a.name.toUpperCase();
-          const nomeB = b.name.toUpperCase();
-          if (nomeA < nomeB) {
-            return -1;
-          }
-          if (nomeA > nomeB) {
-            return 1;
-          }
-          return 0;
-        });
-        setStates(data);
-      });
+    );
+
+    const data = await res.json();
+    console.log(data);
+    setStates(data.sort((a: State, b: State) => a.name.localeCompare(b.name)));
   };
 
-  const handleSelectedStateChanged = async (event: SelectChangeEvent) => {
-    const state = JSON.parse(event.target.value);
+  const handleSelectedStateChanged = async (
+    countryCode: string,
+    stateCode: string
+  ) => {
     const headers = new Headers();
-    headers.append("X-CSCAPI-KEY", process.env.STATES_API_KEY || "");
+    headers.append(
+      "X-CSCAPI-KEY",
+      process.env.NEXT_PUBLIC_STATES_API_KEY || ""
+    );
 
-    fetch(
-      `https://api.countrystatecity.in/v1/countries/${selectedCountry.cca2}/states/${state.iso2}/cities`,
+    const res = await fetch(
+      `https://api.countrystatecity.in/v1/countries/${countryCode}/states/${stateCode}/cities`,
       {
         method: "GET",
         headers: headers,
       }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        data.sort(function (
-          a: {
-            id: string;
-            name: string;
-            latitude: string;
-            longitude: string;
-          },
-          b: {
-            id: string;
-            name: string;
-            latitude: string;
-            longitude: string;
-          }
-        ) {
-          const nomeA = a.name.toUpperCase();
-          const nomeB = b.name.toUpperCase();
-          if (nomeA < nomeB) {
-            return -1;
-          }
-          if (nomeA > nomeB) {
-            return 1;
-          }
-          return 0;
-        });
-        setCities(data);
-      });
+    );
+
+    const data = await res.json();
+    setCities(data.sort((a: City, b: City) => a.name.localeCompare(b.name)));
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!countries || !states || !cities) return <p>Can&apos;t retrieve data</p>;
+  if (!countries) return <p>Can&apos;t retrieve data</p>;
 
   return (
     <form
@@ -331,12 +322,15 @@ export default function FormCadastro() {
         flexDirection: "column",
         gap: "1rem",
         width: "100%",
+        height: "100%",
         marginTop: "2rem",
+        overflowY: "auto",
+        overflowX: "hidden",
       }}
     >
-      <Stepper activeStep={activeStep} orientation="vertical">
-        <Step>
-          <StepLabel
+      <Stepper nonLinear activeStep={activeStep} orientation="vertical">
+        <Step completed={completed[0]}>
+          <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
                 color: customTheme.palette.primary.main,
@@ -345,9 +339,10 @@ export default function FormCadastro() {
                 color: customTheme.palette.primary.main,
               },
             }}
+            onClick={handleStep(0)}
           >
             Personal Info
-          </StepLabel>
+          </StepButton>
           <StepContent>
             <Stack spacing={2} sx={{ mt: 2 }}>
               <Stack direction={"row"} spacing={2}>
@@ -441,11 +436,16 @@ export default function FormCadastro() {
               <Button variant="contained" onClick={handleNext}>
                 Continue
               </Button>
+              <Button onClick={handleComplete}>
+                {completedSteps() === stepsToRegister
+                  ? "Finish"
+                  : "Complete Step"}
+              </Button>
             </Stack>
           </StepContent>
         </Step>
-        <Step>
-          <StepLabel
+        <Step completed={completed[1]}>
+          <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
                 color: customTheme.palette.primary.main,
@@ -454,148 +454,174 @@ export default function FormCadastro() {
                 color: customTheme.palette.primary.main,
               },
             }}
+            onClick={handleStep(1)}
           >
             Location Info
-          </StepLabel>
+          </StepButton>
           <StepContent>
             <Stack direction={"column"} spacing={2} sx={{ mt: 2 }}>
               <Stack direction={"row"} spacing={2}>
-                <FormControl
-                  required
-                  fullWidth
-                  sx={{
-                    "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
-                      {
-                        color: "#c2c2c2",
-                      },
-                    svg: {
-                      color: "#c2c2c2",
-                    },
-                  }}
-                >
-                  <InputLabel id="demo-simple-select-label">Country</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Country"
-                    {...register("country")}
-                    error={!!errors.country}
-                    onChange={(event: SelectChangeEvent) => {
-                      handleSelectedCountryChanged(event);
-                    }}
-                  >
-                    {countries.length > 0 &&
-                      countries.map((country) => {
-                        return (
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl
+                      fullWidth
+                      error={!!errors.country}
+                      sx={{
+                        "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
+                          {
+                            color: "#c2c2c2",
+                          },
+                        svg: {
+                          color: "#c2c2c2",
+                        },
+                      }}
+                    >
+                      <InputLabel>Country</InputLabel>
+                      <Select
+                        {...field}
+                        label="Country"
+                        value={field.value}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          const country = countries.find(
+                            (c: Country) => c.name.common === name
+                          );
+                          if (country) {
+                            setSelectedCountry(country);
+                            field.onChange(country.name.common);
+                            handleSelectedCountryChanged(country.cca2);
+                          }
+                        }}
+                      >
+                        {countries.map((country) => (
                           <MenuItem
-                            key={country.name.common}
-                            value={JSON.stringify(country)}
+                            key={country.cca2}
+                            value={country.name.common}
                           >
                             {country.name.common}
                           </MenuItem>
-                        );
-                      })}
-                  </Select>
-                  <FormHelperText>{errors.country?.message}</FormHelperText>
-                </FormControl>
-                <FormControl
-                  required
-                  fullWidth
-                  sx={{
-                    "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
-                      {
-                        color: "#c2c2c2",
-                      },
-                    svg: {
-                      color: "#c2c2c2",
-                    },
-                  }}
-                >
-                  <InputLabel id="demo-simple-select-label">State</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="State"
-                    {...register("state")}
-                    error={!!errors.state}
-                    onChange={(event: SelectChangeEvent) => {
-                      handleSelectedStateChanged(event);
-                    }}
-                  >
-                    {states.length > 0 &&
-                      states.map((state) => {
-                        return (
-                          <MenuItem
-                            key={state.name}
-                            value={JSON.stringify(state)}
-                          >
+                        ))}
+                      </Select>
+                      <FormHelperText>{errors.country?.message}</FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="state"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl
+                      fullWidth
+                      error={!!errors.state}
+                      sx={{
+                        "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
+                          {
+                            color: "#c2c2c2",
+                          },
+                        svg: {
+                          color: "#c2c2c2",
+                        },
+                      }}
+                    >
+                      <InputLabel>State</InputLabel>
+                      <Select
+                        {...field}
+                        label="State"
+                        value={field.value}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          const state = states.find(
+                            (s: State) => s.name === name
+                          );
+                          if (state) {
+                            field.onChange(name);
+                            handleSelectedStateChanged(
+                              selectedCountry.cca2,
+                              state.iso2
+                            );
+                          }
+                        }}
+                      >
+                        {states.map((state) => (
+                          <MenuItem key={state.id} value={state.name}>
                             {state.name}
                           </MenuItem>
-                        );
-                      })}
-                  </Select>
-                  <FormHelperText>{errors.state?.message}</FormHelperText>
-                </FormControl>
+                        ))}
+                      </Select>
+                      <FormHelperText>{errors.state?.message}</FormHelperText>
+                    </FormControl>
+                  )}
+                />
               </Stack>
               <Stack direction={"row"} spacing={2}>
-                <FormControl
-                  required
-                  fullWidth
-                  sx={{
-                    "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
-                      {
-                        color: "#c2c2c2",
-                      },
-                    svg: {
-                      color: "#c2c2c2",
-                    },
-                  }}
-                >
-                  <InputLabel id="demo-simple-select-label">City</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="City"
-                    {...register("city")}
-                    error={!!errors.city}
-                  >
-                    {cities.length > 0 &&
-                      cities.map((city) => {
-                        return (
-                          <MenuItem key={city.name} value={city.name}>
+                <Controller
+                  name="city"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl
+                      fullWidth
+                      error={!!errors.city}
+                      sx={{
+                        "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
+                          {
+                            color: "#c2c2c2",
+                          },
+                        svg: {
+                          color: "#c2c2c2",
+                        },
+                      }}
+                    >
+                      <InputLabel>City</InputLabel>
+                      <Select
+                        {...field}
+                        label="City"
+                        value={field.value}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                        }}
+                      >
+                        {cities.map((city) => (
+                          <MenuItem key={city.id} value={JSON.stringify(city)}>
                             {city.name}
                           </MenuItem>
-                        );
-                      })}
-                  </Select>
-                  <FormHelperText>{errors.city?.message}</FormHelperText>
-                </FormControl>
-                <TextField
-                  variant="outlined"
-                  type="text"
-                  required
-                  label="Postal Code"
-                  fullWidth
-                  {...register("postalCode")}
-                  error={!!errors.postalCode}
-                  helperText={errors.postalCode?.message}
-                  sx={{
-                    input: {
-                      color: "#c2c2c2",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment
-                          sx={{ color: "#c2c2c2" }}
-                          position="start"
-                        >
-                          <PinIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
+                        ))}
+                      </Select>
+                      <FormHelperText>{errors.city?.message}</FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="postalCode"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      variant="outlined"
+                      type="text"
+                      required
+                      label="Postal Code"
+                      fullWidth
+                      error={!!errors.postalCode}
+                      helperText={errors.postalCode?.message}
+                      sx={{
+                        input: { color: "#c2c2c2" },
+                      }}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment
+                              sx={{ color: "#c2c2c2" }}
+                              position="start"
+                            >
+                              <PinIcon />
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
+                    />
+                  )}
                 />
               </Stack>
             </Stack>
@@ -610,17 +636,22 @@ export default function FormCadastro() {
                 justifyContent: "center",
               }}
             >
+              <Button onClick={handleBack} variant="outlined" size="small">
+                Back
+              </Button>
               <Button variant="contained" onClick={handleNext}>
                 Continue
               </Button>
-              <Button onClick={handleBack} variant="outlined" size="small">
-                Back
+              <Button onClick={handleComplete}>
+                {completedSteps() === stepsToRegister
+                  ? "Finish"
+                  : "Complete Step"}
               </Button>
             </Stack>
           </StepContent>
         </Step>
-        <Step>
-          <StepLabel
+        <Step completed={completed[2]}>
+          <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
                 color: customTheme.palette.primary.main,
@@ -629,37 +660,42 @@ export default function FormCadastro() {
                 color: customTheme.palette.primary.main,
               },
             }}
+            onClick={handleStep(2)}
           >
             Contact Info
-          </StepLabel>
+          </StepButton>
           <StepContent>
             <Stack direction={"column"} spacing={2} sx={{ mt: 2 }}>
-              <TextField
-                variant="outlined"
-                type="tel"
-                required
-                label="Phone Number"
-                fullWidth
-                {...register("phoneNumber")}
-                error={!!errors.phoneNumber}
-                helperText={errors.phoneNumber?.message}
-                sx={{
-                  input: {
-                    color: "#c2c2c2",
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment
-                        sx={{ color: "#c2c2c2" }}
-                        position="start"
-                      >
-                        <ContactPhoneIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    variant="outlined"
+                    type="tel"
+                    required
+                    label="Phone Number"
+                    fullWidth
+                    error={!!errors.phoneNumber}
+                    helperText={errors.phoneNumber?.message}
+                    sx={{
+                      input: { color: "#c2c2c2" },
+                    }}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment
+                            sx={{ color: "#c2c2c2" }}
+                            position="start"
+                          >
+                            <ContactPhoneIcon />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                )}
               />
               <TextField
                 variant="outlined"
@@ -727,17 +763,22 @@ export default function FormCadastro() {
                 justifyContent: "center",
               }}
             >
+              <Button onClick={handleBack} variant="outlined" size="small">
+                Back
+              </Button>
               <Button variant="contained" onClick={handleNext}>
                 Continue
               </Button>
-              <Button onClick={handleBack} variant="outlined" size="small">
-                Back
+              <Button onClick={handleComplete}>
+                {completedSteps() === stepsToRegister
+                  ? "Finish"
+                  : "Complete Step"}
               </Button>
             </Stack>
           </StepContent>
         </Step>
-        <Step>
-          <StepLabel
+        <Step completed={completed[3]}>
+          <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
                 color: customTheme.palette.primary.main,
@@ -746,9 +787,10 @@ export default function FormCadastro() {
                 color: customTheme.palette.primary.main,
               },
             }}
+            onClick={handleStep(3)}
           >
-            Access Info <Typography variant="caption">( Last step )</Typography>
-          </StepLabel>
+            Access Info
+          </StepButton>
           <StepContent>
             <Stack direction={"column"} spacing={2} sx={{ mt: 2 }}>
               <TextField
@@ -798,9 +840,9 @@ export default function FormCadastro() {
                 required
                 label="Confirm Password"
                 fullWidth
-                {...register("confirmEmail")}
-                error={!!errors.confirmEmail}
-                helperText={errors.confirmEmail?.message}
+                {...register("confirmPassword")}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword?.message}
                 sx={{
                   input: {
                     color: "#c2c2c2",
@@ -845,17 +887,22 @@ export default function FormCadastro() {
                 justifyContent: "center",
               }}
             >
+              <Button onClick={handleBack} variant="outlined" size="small">
+                Back
+              </Button>
               <Button variant="contained" onClick={handleNext}>
                 Continue
               </Button>
-              <Button onClick={handleBack} variant="outlined" size="small">
-                Back
+              <Button onClick={handleComplete}>
+                {completedSteps() === stepsToRegister
+                  ? "Finish"
+                  : "Complete Step"}
               </Button>
             </Stack>
           </StepContent>
         </Step>
       </Stepper>
-      {activeStep === stepsToRegister && (
+      {allStepsCompleted() && (
         <Box>
           <Typography>All steps completed. You can register now.</Typography>
           <Button
@@ -871,7 +918,7 @@ export default function FormCadastro() {
       <Button
         variant="contained"
         disableElevation
-        disabled={!(activeStep === stepsToRegister)}
+        disabled={!allStepsCompleted()}
         size="large"
         sx={{
           "&:disabled": {

@@ -32,7 +32,7 @@ export default function Login() {
             height: "100%",
             left: 0,
             top: 0,
-            boxShadow: "rgba(255, 255, 255, 1) 0px 150px 200px -100px",
+            boxShadow: "#d859ff 0px 150px 200px -100px",
             mixBlendMode: "soft-light",
           },
         }}

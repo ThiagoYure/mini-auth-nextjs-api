@@ -12,14 +12,12 @@ export default function Login() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "92vh",
         padding: "5rem",
       }}
     >
       <Stack
         direction={"row"}
         sx={{
-          minHeight: 450,
           width: 1000,
           borderRadius: "1rem",
           position: "relative",
@@ -33,7 +31,7 @@ export default function Login() {
             height: "100%",
             left: 0,
             top: 0,
-            boxShadow: "rgba(255, 255, 255, 1) 0px 150px 200px -100px",
+            boxShadow: "#d859ff 0px 150px 200px -100px",
             mixBlendMode: "soft-light",
           },
         }}
@@ -43,7 +41,11 @@ export default function Login() {
           alignItems={"center"}
           justifyContent={"center"}
           flex={1}
-          sx={{ padding: "3rem 3rem", textAlign: "center" }}
+          sx={{
+            padding: "3rem 3rem",
+            textAlign: "center",
+            height: "100%",
+          }}
         >
           <Typography variant="h3" fontWeight={"700"} color="primary">
             Registration
