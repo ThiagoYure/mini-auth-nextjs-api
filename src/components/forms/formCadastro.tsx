@@ -18,6 +18,8 @@ import {
   FormHelperText,
   Alert,
   StepButton,
+  Snackbar,
+  CircularProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import LockIcon from "@mui/icons-material/Lock";
@@ -35,12 +37,20 @@ import { z } from "zod";
 import { Country } from "@/types/Country";
 import { State } from "@/types/State";
 import { City } from "@/types/City";
+import { registerUser } from "@/services/authService";
+import { saveUserData } from "@/services/userService";
+import { useAuthStore } from "@/stores/authStore";
+import { FirebaseError } from "firebase/app";
 
 const steps = ["Personal Info", "Location Info", "Contact Info", "Access Info"];
 const stepsToRegister = steps.length;
 
 export default function FormCadastro() {
   const [loading, setLoading] = useState(true);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [processingData, setProcessingData] = useState(false);
+  const [message, setMessage] = useState("");
   const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<Country>({
     name: {
@@ -64,6 +74,10 @@ export default function FormCadastro() {
   const [completed, setCompleted] = useState<{
     [k: number]: boolean;
   }>({});
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   const validateStepFields = async () => {
     let stepFields: (keyof FormData)[] = [];
@@ -211,6 +225,7 @@ export default function FormCadastro() {
     trigger,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -253,17 +268,103 @@ export default function FormCadastro() {
   }, []);
 
   const onSubmit = async (data: FormData) => {
+    setProcessing(true);
     try {
-      console.log(data);
-      setSuccess(true);
-    } catch (err) {
-      console.error("Error at registration:", err);
+      const user = await registerUser(data.email, data.password);
+
+      if (!user?.uid) {
+        setProcessing(false);
+        setSuccess(false);
+        setMessage("Registration failed.");
+        setOpenSnackbar(true);
+      } else {
+        const userData = {
+          birthdate: data.birthdate,
+          city: data.city,
+          email: data.email,
+          confirmEmail: data.confirmEmail,
+          state: data.state,
+          country: data.country,
+          postalCode: data.postalCode,
+          phoneNumber: data.phoneNumber,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          uid: user.uid,
+        };
+
+        try {
+          await saveUserData(userData);
+          useAuthStore.getState().setUser(userData);
+          setProcessing(false);
+          setSuccess(true);
+          setMessage("Registration successfull!");
+          setOpenSnackbar(true);
+          reset();
+          setSelectedCountry({
+            name: {
+              common: "",
+              official: "",
+              nativeName: "",
+            },
+            translations: "",
+            cca2: "",
+            idd: { root: "", suffixes: [] },
+            postalCode: {
+              format: "",
+              regex: "",
+            },
+          });
+          setStates([]);
+          setCities([]);
+          setActiveStep(0);
+          setCompleted({});
+        } catch (error: unknown) {
+          setProcessing(false);
+          if (error instanceof FirebaseError) {
+            setSuccess(false);
+            setMessage("An error occurred trying to save the user data.");
+            setOpenSnackbar(true);
+            console.error(
+              "Registration failed. An error occurred:",
+              error.code
+            );
+          } else {
+            setSuccess(false);
+            setMessage("An error occurred trying to save the user data.");
+            setOpenSnackbar(true);
+            console.error(
+              "Registration failed. An unknown error occurred:",
+              error
+            );
+          }
+        }
+      }
+    } catch (error: unknown) {
+      setProcessing(false);
+      if (error instanceof FirebaseError) {
+        setSuccess(false);
+        if (error.code === "auth/email-already-in-use") {
+          setMessage(
+            "Registration failed. Already exists an registered user with this email."
+          );
+        } else {
+          setMessage("Registration Failed.");
+        }
+        setOpenSnackbar(true);
+        console.error("Registration failed. An error occurred:", error.code);
+      } else {
+        setSuccess(false);
+        setMessage("Registration failed.");
+        setOpenSnackbar(true);
+        console.error("Registration failed. An unknown error occurred:", error);
+      }
     }
   };
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
   const handleSelectedCountryChanged = async (countryCode: string) => {
+    setProcessingData(true);
     const selectedCountry: Country[] = countries.filter((country) => {
       return country.cca2 === countryCode;
     });
@@ -284,14 +385,15 @@ export default function FormCadastro() {
     );
 
     const data = await res.json();
-    console.log(data);
     setStates(data.sort((a: State, b: State) => a.name.localeCompare(b.name)));
+    setProcessingData(false);
   };
 
   const handleSelectedStateChanged = async (
     countryCode: string,
     stateCode: string
   ) => {
+    setProcessingData(true);
     const headers = new Headers();
     headers.append(
       "X-CSCAPI-KEY",
@@ -308,9 +410,10 @@ export default function FormCadastro() {
 
     const data = await res.json();
     setCities(data.sort((a: City, b: City) => a.name.localeCompare(b.name)));
+    setProcessingData(false);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <CircularProgress />;
   if (!countries) return <p>Can&apos;t retrieve data</p>;
 
   return (
@@ -544,11 +647,20 @@ export default function FormCadastro() {
                           }
                         }}
                       >
-                        {states.map((state) => (
-                          <MenuItem key={state.id} value={state.name}>
-                            {state.name}
+                        {states.length > 0 ? (
+                          states.map((state) => (
+                            <MenuItem key={state.id} value={state.name}>
+                              {state.name}
+                            </MenuItem>
+                          ))
+                        ) : processingData ? (
+                          <MenuItem disabled>
+                            <CircularProgress size="30px" sx={{ mr: "1rem" }} />{" "}
+                            loading data...
                           </MenuItem>
-                        ))}
+                        ) : (
+                          <MenuItem disabled>Select a country first.</MenuItem>
+                        )}
                       </Select>
                       <FormHelperText>{errors.state?.message}</FormHelperText>
                     </FormControl>
@@ -582,11 +694,20 @@ export default function FormCadastro() {
                           field.onChange(e.target.value);
                         }}
                       >
-                        {cities.map((city) => (
-                          <MenuItem key={city.id} value={JSON.stringify(city)}>
-                            {city.name}
+                        {cities.length > 0 ? (
+                          cities.map((city) => (
+                            <MenuItem key={city.id} value={city.name}>
+                              {city.name}
+                            </MenuItem>
+                          ))
+                        ) : processingData ? (
+                          <MenuItem disabled>
+                            <CircularProgress size="30px" sx={{ mr: "1rem" }} />{" "}
+                            loading data...
                           </MenuItem>
-                        ))}
+                        ) : (
+                          <MenuItem disabled>Select a state first.</MenuItem>
+                        )}
                       </Select>
                       <FormHelperText>{errors.city?.message}</FormHelperText>
                     </FormControl>
@@ -917,9 +1038,12 @@ export default function FormCadastro() {
       )}
       <Button
         variant="contained"
+        loading={processing}
+        loadingPosition="end"
         disableElevation
         disabled={!allStepsCompleted()}
         size="large"
+        type="submit"
         sx={{
           "&:disabled": {
             color: "#c2c2c2",
@@ -929,7 +1053,21 @@ export default function FormCadastro() {
       >
         Register
       </Button>
-      {success && <Alert severity="success">Successfull registration!</Alert>}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        anchorOrigin={{ horizontal: "center", vertical: "top" }}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={success ? "success" : "error"}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </form>
   );
 }
