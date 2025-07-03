@@ -68,13 +68,22 @@ export default function FormLogin() {
         setOpenSnackbar(true);
         setTimeout(() => {
           router.push("/home");
-        }, 5000);
+        }, 1000);
       }
     } catch (error: unknown) {
       setProcessing(false);
       if (error instanceof FirebaseError) {
+        console.log(error.code);
         setSuccess(false);
-        setMessage("Login failed. An error occurred.");
+        switch (error.code) {
+          case "auth/invalid-credential":
+            setMessage(
+              "There's no user registered with this email or password."
+            );
+            break;
+          default:
+            setMessage("Login failed. An error occurred");
+        }
         setOpenSnackbar(true);
       } else {
         setSuccess(false);
