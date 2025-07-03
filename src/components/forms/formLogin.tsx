@@ -68,7 +68,7 @@ export default function FormLogin() {
         setOpenSnackbar(true);
         setTimeout(() => {
           router.push("/home");
-        }, 1000);
+        }, 500);
       }
     } catch (error: unknown) {
       setProcessing(false);

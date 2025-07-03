@@ -5,6 +5,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { CssBaseline, GlobalStyles, ThemeProvider } from "@mui/material";
 import customTheme from "@/themes/customTheme";
 import CustomFooter from "@/components/shared/customFooter";
+import PageTransition from "@/components/shared/pageTransition";
 
 export default function RootLayout({
   children,
@@ -24,7 +25,7 @@ export default function RootLayout({
                 },
               }}
             />
-            {children}
+            <PageTransition>{children}</PageTransition>
             <CustomFooter />
           </ThemeProvider>
         </AppRouterCacheProvider>
