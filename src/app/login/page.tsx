@@ -1,11 +1,12 @@
 "use client";
 
 import FormLogin from "@/components/forms/formLogin";
-import customTheme from "@/themes/customTheme";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Container, Stack, Typography, useTheme } from "@mui/material";
 import Link from "next/link";
 
 export default function Login() {
+  const theme = useTheme();
+
   return (
     <Container
       sx={{
@@ -22,7 +23,7 @@ export default function Login() {
           minWidth: 800,
           borderRadius: "1rem",
           position: "relative",
-          backgroundColor: customTheme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           "&::before": {
             content: "''",
             zIndex: -1,
@@ -58,7 +59,7 @@ export default function Login() {
             <Link
               href="/cadastro"
               style={{
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
                 cursor: "pointer",
               }}
             >

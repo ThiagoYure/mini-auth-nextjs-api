@@ -1,6 +1,7 @@
 "use client";
+import ThemeSelector from "@/components/shared/themeSelector";
 import { useAuthStore } from "@/stores/authStore";
-import { Button, Typography } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -18,9 +19,19 @@ export default function Login() {
   if (!user) return null;
 
   return (
-    <>
-      <Typography variant="h4">Bem-vindo, {user.email}</Typography>
+    <Stack
+      direction={"column"}
+      spacing={2}
+      alignItems={"center"}
+      justifyContent={"center"}
+      sx={{ width: "100%", height: "90vh" }}
+    >
+      <Typography variant="h4" fontWeight={700} color="primary">
+        Bem-vindo, {user.email}
+      </Typography>
+      <ThemeSelector />
       <Button
+        sx={{ width: "300px" }}
         variant="outlined"
         onClick={() => {
           logout();
@@ -29,6 +40,6 @@ export default function Login() {
       >
         Sair
       </Button>
-    </>
+    </Stack>
   );
 }

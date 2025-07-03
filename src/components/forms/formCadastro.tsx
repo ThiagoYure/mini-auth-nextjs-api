@@ -20,6 +20,7 @@ import {
   StepButton,
   Snackbar,
   CircularProgress,
+  useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import LockIcon from "@mui/icons-material/Lock";
@@ -30,7 +31,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import PinIcon from "@mui/icons-material/Pin";
 import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
-import customTheme from "@/themes/customTheme";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -74,6 +74,7 @@ export default function FormCadastro() {
   const [completed, setCompleted] = useState<{
     [k: number]: boolean;
   }>({});
+  const theme = useTheme();
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -435,10 +436,10 @@ export default function FormCadastro() {
           <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-completed": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
             }}
             onClick={handleStep(0)}
@@ -459,14 +460,14 @@ export default function FormCadastro() {
                   helperText={errors.firstName?.message}
                   sx={{
                     input: {
-                      color: "#c2c2c2",
+                      color: theme.typography,
                     },
                   }}
                   slotProps={{
                     input: {
                       startAdornment: (
                         <InputAdornment
-                          sx={{ color: "#c2c2c2" }}
+                          sx={{ color: theme.typography }}
                           position="start"
                         >
                           <PersonIcon />
@@ -486,14 +487,14 @@ export default function FormCadastro() {
                   helperText={errors.lastName?.message}
                   sx={{
                     input: {
-                      color: "#c2c2c2",
+                      color: theme.typography,
                     },
                   }}
                   slotProps={{
                     input: {
                       startAdornment: (
                         <InputAdornment
-                          sx={{ color: "#c2c2c2" }}
+                          sx={{ color: theme.typography }}
                           position="start"
                         >
                           <PersonIcon />
@@ -514,7 +515,7 @@ export default function FormCadastro() {
                 helperText={errors.birthdate?.message}
                 sx={{
                   input: {
-                    color: "#c2c2c2",
+                    color: theme.typography,
                   },
                 }}
                 slotProps={{
@@ -550,10 +551,10 @@ export default function FormCadastro() {
           <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-completed": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
             }}
             onClick={handleStep(1)}
@@ -573,10 +574,10 @@ export default function FormCadastro() {
                       sx={{
                         "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
                           {
-                            color: "#c2c2c2",
+                            color: theme.typography,
                           },
                         svg: {
-                          color: "#c2c2c2",
+                          color: theme.typography,
                         },
                       }}
                     >
@@ -620,10 +621,10 @@ export default function FormCadastro() {
                       sx={{
                         "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
                           {
-                            color: "#c2c2c2",
+                            color: theme.typography,
                           },
                         svg: {
-                          color: "#c2c2c2",
+                          color: theme.typography,
                         },
                       }}
                     >
@@ -677,10 +678,10 @@ export default function FormCadastro() {
                       sx={{
                         "& .mui-akcn92-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root":
                           {
-                            color: "#c2c2c2",
+                            color: theme.typography,
                           },
                         svg: {
-                          color: "#c2c2c2",
+                          color: theme.typography,
                         },
                       }}
                     >
@@ -738,13 +739,13 @@ export default function FormCadastro() {
                         field.onChange(e);
                       }}
                       sx={{
-                        input: { color: "#c2c2c2" },
+                        input: { color: theme.typography },
                       }}
                       slotProps={{
                         input: {
                           startAdornment: (
                             <InputAdornment
-                              sx={{ color: "#c2c2c2" }}
+                              sx={{ color: theme.typography }}
                               position="start"
                             >
                               <PinIcon />
@@ -786,10 +787,10 @@ export default function FormCadastro() {
           <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-completed": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
             }}
             onClick={handleStep(2)}
@@ -817,13 +818,13 @@ export default function FormCadastro() {
                       field.onChange(e);
                     }}
                     sx={{
-                      input: { color: "#c2c2c2" },
+                      input: { color: theme.typography },
                     }}
                     slotProps={{
                       input: {
                         startAdornment: (
                           <InputAdornment
-                            sx={{ color: "#c2c2c2" }}
+                            sx={{ color: theme.typography }}
                             position="start"
                           >
                             <ContactPhoneIcon sx={{ mr: 1 }} />
@@ -846,14 +847,14 @@ export default function FormCadastro() {
                 helperText={errors.email?.message}
                 sx={{
                   input: {
-                    color: "#c2c2c2",
+                    color: theme.typography,
                   },
                 }}
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment
-                        sx={{ color: "#c2c2c2" }}
+                        sx={{ color: theme.typography }}
                         position="start"
                       >
                         <EmailIcon />
@@ -873,14 +874,14 @@ export default function FormCadastro() {
                 helperText={errors.confirmEmail?.message}
                 sx={{
                   input: {
-                    color: "#c2c2c2",
+                    color: theme.typography,
                   },
                 }}
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment
-                        sx={{ color: "#c2c2c2" }}
+                        sx={{ color: theme.typography }}
                         position="start"
                       >
                         <MarkEmailReadIcon />
@@ -919,10 +920,10 @@ export default function FormCadastro() {
           <StepButton
             sx={{
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-active": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
               "& .mui-1ew0d3t-MuiStepLabel-label.Mui-completed": {
-                color: customTheme.palette.primary.main,
+                color: theme.palette.primary.main,
               },
             }}
             onClick={handleStep(3)}
@@ -942,14 +943,14 @@ export default function FormCadastro() {
                 helperText={errors.password?.message}
                 sx={{
                   input: {
-                    color: "#c2c2c2",
+                    color: theme.typography,
                   },
                 }}
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment
-                        sx={{ color: "#c2c2c2" }}
+                        sx={{ color: theme.typography }}
                         position="start"
                       >
                         <LockIcon />
@@ -962,9 +963,11 @@ export default function FormCadastro() {
                           edge="end"
                         >
                           {showPassword ? (
-                            <VisibilityOffIcon sx={{ color: "#c2c2c2" }} />
+                            <VisibilityOffIcon
+                              sx={{ color: theme.typography }}
+                            />
                           ) : (
-                            <VisibilityIcon sx={{ color: "#c2c2c2" }} />
+                            <VisibilityIcon sx={{ color: theme.typography }} />
                           )}
                         </IconButton>
                       </InputAdornment>
@@ -983,14 +986,14 @@ export default function FormCadastro() {
                 helperText={errors.confirmPassword?.message}
                 sx={{
                   input: {
-                    color: "#c2c2c2",
+                    color: theme.typography,
                   },
                 }}
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment
-                        sx={{ color: "#c2c2c2" }}
+                        sx={{ color: theme.typography }}
                         position="start"
                       >
                         <LockIcon />
@@ -1003,9 +1006,11 @@ export default function FormCadastro() {
                           edge="end"
                         >
                           {showPassword ? (
-                            <VisibilityOffIcon sx={{ color: "#c2c2c2" }} />
+                            <VisibilityOffIcon
+                              sx={{ color: theme.typography }}
+                            />
                           ) : (
-                            <VisibilityIcon sx={{ color: "#c2c2c2" }} />
+                            <VisibilityIcon sx={{ color: theme.typography }} />
                           )}
                         </IconButton>
                       </InputAdornment>
@@ -1061,12 +1066,6 @@ export default function FormCadastro() {
         disabled={!allStepsCompleted()}
         size="large"
         type="submit"
-        sx={{
-          "&:disabled": {
-            color: "#c2c2c2",
-            backgroundColor: "#4e4e4e",
-          },
-        }}
       >
         Register
       </Button>

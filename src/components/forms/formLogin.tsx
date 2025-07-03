@@ -5,6 +5,7 @@ import {
   InputAdornment,
   Snackbar,
   TextField,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import LockIcon from "@mui/icons-material/Lock";
@@ -27,6 +28,7 @@ export default function FormLogin() {
   const [message, setMessage] = useState("");
   const login = useAuthStore((s) => s.login);
   const router = useRouter();
+  const theme = useTheme();
 
   const schema = z.object({
     email: z
@@ -116,13 +118,13 @@ export default function FormLogin() {
         helperText={errors.email?.message}
         sx={{
           input: {
-            color: "#c2c2c2",
+            color: theme.typography,
           },
         }}
         slotProps={{
           input: {
             startAdornment: (
-              <InputAdornment sx={{ color: "#c2c2c2" }} position="start">
+              <InputAdornment sx={{ color: theme.typography }} position="start">
                 <EmailIcon />
               </InputAdornment>
             ),
@@ -140,13 +142,13 @@ export default function FormLogin() {
         helperText={errors.password?.message}
         sx={{
           input: {
-            color: "#c2c2c2",
+            color: theme.typography,
           },
         }}
         slotProps={{
           input: {
             startAdornment: (
-              <InputAdornment sx={{ color: "#c2c2c2" }} position="start">
+              <InputAdornment sx={{ color: theme.typography }} position="start">
                 <LockIcon />
               </InputAdornment>
             ),
@@ -154,9 +156,9 @@ export default function FormLogin() {
               <InputAdornment position="end">
                 <IconButton onClick={handleClickShowPassword} edge="end">
                   {showPassword ? (
-                    <VisibilityOffIcon sx={{ color: "#c2c2c2" }} />
+                    <VisibilityOffIcon sx={{ color: theme.typography }} />
                   ) : (
-                    <VisibilityIcon sx={{ color: "#c2c2c2" }} />
+                    <VisibilityIcon sx={{ color: theme.typography }} />
                   )}
                 </IconButton>
               </InputAdornment>
@@ -171,12 +173,6 @@ export default function FormLogin() {
         disableElevation
         size="large"
         type="submit"
-        sx={{
-          "&:disabled": {
-            color: "#c2c2c2",
-            backgroundColor: "#4e4e4e",
-          },
-        }}
       >
         Register
       </Button>

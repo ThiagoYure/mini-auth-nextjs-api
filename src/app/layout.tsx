@@ -3,7 +3,10 @@
 import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { CssBaseline, GlobalStyles, ThemeProvider } from "@mui/material";
-import customTheme from "@/themes/customTheme";
+import { useThemeStore } from "@/stores/themeStore";
+import { lightTheme } from "@/themes/lightTheme";
+import { darkTheme } from "@/themes/darkTheme";
+import { colorfullTheme } from "@/themes/colorfullTheme";
 import CustomFooter from "@/components/shared/customFooter";
 import PageTransition from "@/components/shared/pageTransition";
 
@@ -12,16 +15,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const themeKey = useThemeStore((s) => s.theme);
+
+  const theme =
+    themeKey === "dark"
+      ? darkTheme
+      : themeKey === "colorfull"
+      ? colorfullTheme
+      : lightTheme;
+
   return (
     <html lang="en">
       <body>
         <AppRouterCacheProvider>
-          <ThemeProvider theme={customTheme}>
+          <ThemeProvider theme={theme}>
             <CssBaseline />
             <GlobalStyles
               styles={{
                 body: {
-                  background: customTheme.palette.background.default,
+                  background: theme.palette.background.default,
                 },
               }}
             />
