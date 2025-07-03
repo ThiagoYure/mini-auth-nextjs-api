@@ -39,7 +39,6 @@ import { State } from "@/types/State";
 import { City } from "@/types/City";
 import { registerUser } from "@/services/authService";
 import { saveUserData } from "@/services/userService";
-import { useAuthStore } from "@/stores/authStore";
 import { FirebaseError } from "firebase/app";
 import { formatPhoneNumber, formatPostalCode } from "@/utils/formatters";
 
@@ -286,10 +285,9 @@ export default function FormCadastro() {
 
         try {
           await saveUserData(userData);
-          useAuthStore.getState().setUser(userData);
           setProcessing(false);
           setSuccess(true);
-          setMessage("Registration successfull!");
+          setMessage("Registration successfull! You can proceed to login now.");
           setOpenSnackbar(true);
           reset();
           setSelectedCountry({
@@ -405,9 +403,6 @@ export default function FormCadastro() {
     setProcessingData(false);
   };
 
-  if (loading) return <CircularProgress />;
-  if (!countries) return <p>Can&apos;t retrieve data</p>;
-
   function calculateIdd() {
     if (selectedCountry) {
       let idd = selectedCountry.idd.root;
@@ -418,6 +413,9 @@ export default function FormCadastro() {
     }
     return "+55";
   }
+
+  if (loading) return <CircularProgress />;
+  if (!countries) return <p>Can&apos;t retrieve data</p>;
 
   return (
     <form
