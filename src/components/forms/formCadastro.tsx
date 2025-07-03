@@ -211,7 +211,6 @@ export default function FormCadastro() {
     handleSubmit,
     control,
     reset,
-    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -252,14 +251,12 @@ export default function FormCadastro() {
     setLoading(false);
   }, []);
 
-  const preparePhone = (phone: string) => {
-    const cleanedPhone = (calculateIdd() + phone).replace(/\D/g, "");
-    setValue("phoneNumber", cleanedPhone);
-  };
-
   const onSubmit = async (data: FormData) => {
     setProcessing(true);
-    preparePhone(data.phoneNumber);
+    const preparedPhone = (calculateIdd() + data.phoneNumber).replace(
+      /\D/g,
+      ""
+    );
     try {
       const user = await registerUser(data.email, data.password);
 
@@ -269,6 +266,7 @@ export default function FormCadastro() {
         setMessage("Registration failed.");
         setOpenSnackbar(true);
       } else {
+        console.log(preparedPhone);
         const userData = {
           birthdate: data.birthdate,
           city: data.city,
@@ -277,7 +275,7 @@ export default function FormCadastro() {
           state: data.state,
           country: data.country,
           postalCode: data.postalCode,
-          phoneNumber: data.phoneNumber,
+          phoneNumber: preparedPhone,
           firstName: data.firstName,
           lastName: data.lastName,
           uid: user.uid,
