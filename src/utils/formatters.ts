@@ -1,49 +1,31 @@
-import { IDD } from "@/types/IDD";
-
-export function getCountryDDI(idd: IDD): string {
-  return idd.root + idd.suffixes.join("");
-}
-
-export function formatPostalCodeByCountry(
-  value: string,
-  format: string
-): string {
-  const digits = value.replace(/\D/g, "");
-  let formatted = "";
-  let digitIndex = 0;
-
-  for (let i = 0; i < format.length && digitIndex < digits.length; i++) {
-    const char = format[i];
-    if (char === "#") {
-      formatted += digits[digitIndex];
-      digitIndex++;
+export function formatPhoneNumber(phoneNumber: string): string {
+  const cleaned = ("" + phoneNumber).replace(/\D/g, "");
+  if (cleaned.length <= 11) {
+    const match = cleaned.substring(0, 11).match(/^(\d{2})(\d{4,5})(\d{4})$/);
+    if (match) {
+      return "(" + match[1] + ") " + match[2] + "-" + match[3];
     } else {
-      formatted += char;
+      return cleaned.substring(0, 11);
+    }
+  } else if (cleaned.length === 12) {
+    const match = cleaned.substring(0, 12).match(/^(\d{3})(\d{4,5})(\d{4})$/);
+    if (match) {
+      return "(" + match[1] + ") " + match[2] + "-" + match[3];
+    } else {
+      return cleaned.substring(0, 12);
+    }
+  } else {
+    const match = cleaned.substring(0, 12).match(/^(\d{2,3})(\d{9,12})$/);
+    if (match) {
+      return "(" + match[1] + ") " + match[2];
+    } else {
+      return cleaned.substring(0, 15);
     }
   }
-
-  return formatted;
 }
 
-export function formatPhoneByCountry(phone: string, idd: IDD): string {
-  const ddi = getCountryDDI(idd).replace(/\D/g, "");
-  const digits = phone.replace(/\D/g, "");
-
-  let localDigits = digits;
-
-  if (digits.startsWith(ddi)) {
-    localDigits = digits.slice(ddi.length);
-  }
-
-  if (ddi === "55") {
-    return localDigits.length <= 10
-      ? localDigits.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3")
-      : localDigits.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-  }
-
-  if (ddi === "1") {
-    return localDigits.replace(/(\d{3})(\d{3})(\d{0,4})/, "($1) $2-$3");
-  }
-
-  return `+${ddi} ${localDigits}`;
+export function formatPostalCode(code: string, format: string) {
+  const cleaned = ("" + code).replace(/\D/g, "");
+  const codeLength = format.replace(/-/g, "").length;
+  return cleaned.substring(0, codeLength);
 }

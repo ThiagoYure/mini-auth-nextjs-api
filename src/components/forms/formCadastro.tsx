@@ -41,6 +41,7 @@ import { registerUser } from "@/services/authService";
 import { saveUserData } from "@/services/userService";
 import { useAuthStore } from "@/stores/authStore";
 import { FirebaseError } from "firebase/app";
+import { formatPhoneNumber, formatPostalCode } from "@/utils/formatters";
 
 const steps = ["Personal Info", "Location Info", "Contact Info", "Access Info"];
 const stepsToRegister = steps.length;
@@ -143,8 +144,6 @@ export default function FormCadastro() {
         } else {
           setActiveStep(-1);
         }
-      } else {
-        console.log("Fill required fields from this step to complete it.");
       }
     });
   };
@@ -176,20 +175,7 @@ export default function FormCadastro() {
       phoneNumber: z
         .string()
         .nonempty("You must inform a phone number.")
-        .refine(
-          (val) => {
-            const ddi =
-              selectedCountry.idd.root +
-              (selectedCountry.idd.suffixes || []).join("");
-            const regex = new RegExp(
-              `^\\${ddi}\\s?\\(?\\d{2}\\)?\\s?\\d{4,5}-\\d{4}$`
-            );
-            return regex.test(val);
-          },
-          {
-            message: "Invalid phone number format.",
-          }
-        ),
+        .min(15, "The phone number must have at least 15 digits."),
       email: z
         .string()
         .nonempty("You must inform a valid email")
@@ -226,6 +212,7 @@ export default function FormCadastro() {
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -253,7 +240,6 @@ export default function FormCadastro() {
       }
     );
     const data = await res.json();
-    console.log(data);
     return data.sort((a: Country, b: Country) =>
       a.name.common.localeCompare(b.name.common)
     );
@@ -267,8 +253,14 @@ export default function FormCadastro() {
     setLoading(false);
   }, []);
 
+  const preparePhone = (phone: string) => {
+    const cleanedPhone = (calculateIdd() + phone).replace(/\D/g, "");
+    setValue("phoneNumber", cleanedPhone);
+  };
+
   const onSubmit = async (data: FormData) => {
     setProcessing(true);
+    preparePhone(data.phoneNumber);
     try {
       const user = await registerUser(data.email, data.password);
 
@@ -415,6 +407,17 @@ export default function FormCadastro() {
 
   if (loading) return <CircularProgress />;
   if (!countries) return <p>Can&apos;t retrieve data</p>;
+
+  function calculateIdd() {
+    if (selectedCountry) {
+      let idd = selectedCountry.idd.root;
+      selectedCountry.idd.suffixes.map((suffix) => {
+        idd = idd + suffix;
+      });
+      return idd;
+    }
+    return "+55";
+  }
 
   return (
     <form
@@ -726,6 +729,18 @@ export default function FormCadastro() {
                       fullWidth
                       error={!!errors.postalCode}
                       helperText={errors.postalCode?.message}
+                      onChange={(e) => {
+                        const { value } = e.target;
+                        if (selectedCountry) {
+                          e.target.value = formatPostalCode(
+                            value,
+                            selectedCountry.postalCode.format
+                          );
+                        }
+                        e.target.value = formatPostalCode(value, "#####-###");
+
+                        field.onChange(e);
+                      }}
                       sx={{
                         input: { color: "#c2c2c2" },
                       }}
@@ -800,6 +815,11 @@ export default function FormCadastro() {
                     fullWidth
                     error={!!errors.phoneNumber}
                     helperText={errors.phoneNumber?.message}
+                    onChange={(e) => {
+                      const { value } = e.target;
+                      e.target.value = formatPhoneNumber(value);
+                      field.onChange(e);
+                    }}
                     sx={{
                       input: { color: "#c2c2c2" },
                     }}
@@ -810,7 +830,8 @@ export default function FormCadastro() {
                             sx={{ color: "#c2c2c2" }}
                             position="start"
                           >
-                            <ContactPhoneIcon />
+                            <ContactPhoneIcon sx={{ mr: 1 }} />
+                            {calculateIdd()}
                           </InputAdornment>
                         ),
                       },
