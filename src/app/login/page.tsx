@@ -17,10 +17,25 @@ export default function Login() {
       }}
     >
       <Stack
-        direction={"row"}
+        direction={{
+          xs: "column-reverse",
+          sm: "column-reverse",
+          md: "row",
+          lg: "row",
+        }}
         sx={{
-          minHeight: 450,
-          minWidth: 800,
+          height: {
+            xs: "80vh",
+            sm: "80vh",
+            md: "500px",
+            lg: "500px",
+          },
+          minWidth: {
+            xs: "80%",
+            sm: "80%",
+            md: "800px",
+            lg: "800px",
+          },
           borderRadius: "1rem",
           position: "relative",
           backgroundColor: theme.palette.background.paper,
@@ -69,7 +84,12 @@ export default function Login() {
         </Stack>
         <Box
           sx={{
-            borderRadius: "0 1rem 1rem 0",
+            borderRadius: {
+              xs: "1rem 1rem 0 0",
+              sm: "1rem 1rem 0 0",
+              md: "0 1rem 1rem 0",
+              lg: "0 1rem 1rem 0",
+            },
             backgroundImage: "url('/images/image-login.webp')",
             flex: 1,
             backgroundRepeat: "no-repeat",

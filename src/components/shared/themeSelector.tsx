@@ -15,11 +15,26 @@ export default function ThemeSelector() {
       justifyContent={"center"}
       direction={"column"}
       spacing={2}
+      width={{
+        xs: "100%",
+        sm: "100%",
+        md: "100%",
+        lg: "100%",
+      }}
     >
       <Typography variant="subtitle1" fontWeight={500}>
         Escolha o tema:
       </Typography>
-      <Stack direction={"row"} spacing={2} sx={{ p: 2 }}>
+      <Stack
+        direction={{
+          xs: "column",
+          sm: "column",
+          md: "row",
+          lg: "row",
+        }}
+        spacing={2}
+        sx={{ p: 2 }}
+      >
         <Box
           width={200}
           height={200}

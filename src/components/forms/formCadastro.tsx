@@ -448,7 +448,10 @@ export default function FormCadastro() {
           </StepButton>
           <StepContent>
             <Stack spacing={2} sx={{ mt: 2 }}>
-              <Stack direction={"row"} spacing={2}>
+              <Stack
+                direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
+                spacing={2}
+              >
                 <TextField
                   variant="outlined"
                   type="text"
@@ -526,7 +529,7 @@ export default function FormCadastro() {
               />
             </Stack>
             <Stack
-              direction={"row"}
+              direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
               spacing={2}
               sx={{
                 display: "flex",
@@ -563,7 +566,10 @@ export default function FormCadastro() {
           </StepButton>
           <StepContent>
             <Stack direction={"column"} spacing={2} sx={{ mt: 2 }}>
-              <Stack direction={"row"} spacing={2}>
+              <Stack
+                direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
+                spacing={2}
+              >
                 <Controller
                   name="country"
                   control={control}
@@ -667,7 +673,10 @@ export default function FormCadastro() {
                   )}
                 />
               </Stack>
-              <Stack direction={"row"} spacing={2}>
+              <Stack
+                direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
+                spacing={2}
+              >
                 <Controller
                   name="city"
                   control={control}
@@ -759,7 +768,7 @@ export default function FormCadastro() {
               </Stack>
             </Stack>
             <Stack
-              direction={"row"}
+              direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
               spacing={2}
               sx={{
                 display: "flex",
@@ -892,7 +901,7 @@ export default function FormCadastro() {
               />
             </Stack>
             <Stack
-              direction={"row"}
+              direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
               spacing={2}
               sx={{
                 display: "flex",
@@ -1020,7 +1029,7 @@ export default function FormCadastro() {
               />
             </Stack>
             <Stack
-              direction={"row"}
+              direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
               spacing={2}
               sx={{
                 display: "flex",

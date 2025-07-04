@@ -1,3 +1,5 @@
+import { Typography } from "@mui/material";
+
 export default function CustomFooter() {
   return (
     <footer
@@ -9,7 +11,19 @@ export default function CustomFooter() {
         padding: "1rem",
       }}
     >
-      &copy;2025, Developed by Thiago Yure.
+      <Typography
+        variant="caption"
+        sx={{
+          fontSize: {
+            xs: "0.8rem",
+            sm: "0.8rem",
+            md: "1rem",
+            lg: "1rem",
+          },
+        }}
+      >
+        &copy;2025, Developed by Thiago Yure.
+      </Typography>
     </footer>
   );
 }

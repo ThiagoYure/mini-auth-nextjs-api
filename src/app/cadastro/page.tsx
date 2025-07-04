@@ -14,12 +14,29 @@ export default function Login() {
         alignItems: "center",
         justifyContent: "center",
         padding: "5rem",
+        minHeight: "92vh",
       }}
     >
       <Stack
-        direction={"row"}
+        direction={{
+          xs: "column-reverse",
+          sm: "column-reverse",
+          md: "row",
+          lg: "row",
+        }}
         sx={{
-          width: 1000,
+          minWidth: {
+            xs: "90vw",
+            sm: "90vw",
+            md: "80%",
+            lg: "80%",
+          },
+          minHeight: {
+            xs: "120vh",
+            sm: "100vh",
+            md: "90vh",
+            lg: "90vh",
+          },
           borderRadius: "1rem",
           position: "relative",
           backgroundColor: theme.palette.background.paper,
@@ -41,9 +58,8 @@ export default function Login() {
           spacing={2}
           alignItems={"center"}
           justifyContent={"center"}
-          flex={1}
           sx={{
-            padding: "3rem 3rem",
+            padding: "3rem 2rem",
             textAlign: "center",
             height: "100%",
           }}
@@ -70,9 +86,14 @@ export default function Login() {
         </Stack>
         <Box
           sx={{
-            borderRadius: "0 1rem 1rem 0",
-            backgroundImage: "url('/images/image-register.webp')",
+            borderRadius: {
+              xs: "1rem 1rem 0 0",
+              sm: "1rem 1rem 0 0",
+              md: "0 1rem 1rem 0",
+              lg: "0 1rem 1rem 0",
+            },
             flex: 1,
+            backgroundImage: "url('/images/image-register.webp')",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
             backgroundSize: "cover",
