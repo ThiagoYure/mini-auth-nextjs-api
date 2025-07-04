@@ -2,33 +2,21 @@ import { useAuthStore } from "@/stores/authStore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { auth } from "@/lib/firebase";
-import { getUserData } from "@/services/userService";
 
 export const useAuth = () => {
-  const setUser = useAuthStore((state) => state.setUser);
+  const login = useAuthStore((state) => state.login);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const extraData = await getUserData(firebaseUser.uid);
-        console.log(extraData);
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email || "",
-          firstName: "",
-          lastName: "",
-          birthdate: "",
-          country: "",
-          state: "",
-          city: "",
-          postalCode: "",
-          phoneNumber: "",
-        });
+        const token = await firebaseUser.getIdToken();
+        login({ uid: firebaseUser.uid, email: firebaseUser.email }, token);
       } else {
-        setUser(null);
+        logout();
       }
     });
 
     return () => unsubscribe();
-  }, [setUser]);
+  }, [login, logout]);
 };
