@@ -6,10 +6,11 @@ Um projeto frontend de authenticação completa usando Nextjs e Firebase para au
 
 ## 🚀 Demonstração
 
-![Preview Light Mode](./tela-task-manager-light-theme.jpg)
-![Preview Dark Mode](./tela-task-manager-dark-theme.jpg)
-![Preview Gerenciador de Tarefas](./tela-task-manager-task-list.jpg)
-![Preview Nova Tarefa](./tela-task-manager-new-task.jpg)
+![Preview Login](./images/tela-mini-auth-login.png)
+![Preview Register](./images/tela-mini-auth-register.png)
+![Preview Home](./images/tela-mini-auth-home.png)
+![Preview Light Mode](./images/tela-mini-auth-light.png)
+![Preview Colorfull Mode](./images/tela-mini-auth-color.png)
 
 🔗 [Acesse o frontend (Vercel)](https://mini-auth-nextjs-api.vercel.app/login)
 
