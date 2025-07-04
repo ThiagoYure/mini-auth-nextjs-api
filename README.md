@@ -11,7 +11,7 @@ Um projeto frontend de authenticação completa usando Nextjs e Firebase para au
 ![Preview Gerenciador de Tarefas](./tela-task-manager-task-list.jpg)
 ![Preview Nova Tarefa](./tela-task-manager-new-task.jpg)
 
-🔗 [Acesse o frontend (Vercel)](https://mini-auth-nextjs-api-git-main-thiago-yures-projects.vercel.app/)
+🔗 [Acesse o frontend (Vercel)](https://mini-auth-nextjs-api.vercel.app/login)
 
 ---
 
