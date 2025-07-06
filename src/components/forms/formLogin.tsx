@@ -174,7 +174,7 @@ export default function FormLogin() {
         size="large"
         type="submit"
       >
-        Register
+        Login
       </Button>
       <Snackbar
         open={openSnackbar}
